@@ -8,6 +8,7 @@ int main(int argc, char ** argv) {
     //QWidget window;
     //window.resize(320, 240);
     Advisor myAdvisor;
+    myAdvisor.resize(420, 520);
     //window.show();        // returns immediately
     //QPushButton *button = new QPushButton(QApplication::translate("ChildWidget", "Press me"), &window);
     //button->move(100, 100);

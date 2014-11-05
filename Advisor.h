@@ -1,9 +1,10 @@
 #ifndef ADVISOR_H
 #define ADVISOR_H
 #include <QWidget>
+#include <QSignalMapper>
 
-class Button;
-class QLineEdit;
+class QPushButton;
+class QTextEdit;
 
 class Advisor:public QWidget
 {
@@ -19,9 +20,10 @@ class Advisor:public QWidget
 		void quitClicked();
 		
 	private:
-		Button *createButton(const QString &text, const char *member);
+		QPushButton *createButton(const QString &text, const char *member);
 		void abortOperatiion();
-		QLineEdit *display;
+		QTextEdit *display;
+		QSignalMapper *signalMapper;
 };
 
 #endif
