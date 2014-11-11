@@ -1,7 +1,23 @@
 #include <QtWidgets>
-
+#include <QFile>
 #include "Advisor.h"
 
+bool isEndSlash(QString fileName)
+{
+	QFile inFile(fileName);
+	inFile.open(QIODevice::ReadOnly | QIODevice::Text);
+	QTextStream stream(&inFile);
+	QString fileString = stream.readAll();
+	if(fileString.endsWith("\\"))
+	{
+		inFile.close();
+		return true;
+	}
+	else{
+		inFile.close();
+		return false;
+	}
+}
 Advisor::Advisor(QWidget *parent)
 	: QWidget(parent)
 {
@@ -37,25 +53,76 @@ QPushButton *Advisor::createButton(const QString &text, const char *member)
 {
 	QPushButton *button = new QPushButton(text);
 	connect(button, SIGNAL(clicked()), this, member);
-	//signalMapper->setMapping(button, text);
 	return button;
 }
 
 void Advisor::adviceClicked()
 {
-	//QPushButton *clickedButton = qobject_cast<QPushButton *>(sender());
-	//clickedButton->insertPlainText(QString("Hello"));
-	display->insertPlainText("Hello");
+	bool endsWithSlash = isEndSlash("advice.dat");
+	QStringList lineList;
+	QFile inFile("advice.dat");
+	int numLines = 0;
+	if(!inFile.open(QIODevice::ReadOnly | QIODevice::Text))
+		display->insertPlainText("Not a valid advice.dat file!\n");
+	else{
+		QTextStream stream(&inFile);
+		while(!stream.atEnd()){
+			QString line = stream.readLine();
+			if(line.endsWith("\\")){
+				do{
+					line = line.remove(QChar('\\'), Qt::CaseInsensitive) + " " + stream.readLine();
+				} while(line.endsWith("\\"));
+			}
+			lineList.append(line);
+			numLines++;
+		}
+		inFile.close();
+	}
+		if(endsWithSlash)
+		{
+			display->insertPlainText("You can't end advice.dat with a backslash!\n");
+		}
+		else{
+			int randNum = rand()%(numLines);
+			display->insertPlainText("Advice: " + lineList[randNum] + "\n");
+		}
 }
 
 void Advisor::weatherClicked()
 {
-	//QPushButton *clickedButton = qobject_cast<QPushButton *>(sender());
+	bool endsWithSlash = isEndSlash("weather.dat");
+	QStringList lineList;
+	QFile inFile("weather.dat");
+	int numLines = 0;
+	if(!inFile.open(QIODevice::ReadOnly | QIODevice::Text))
+		display->insertPlainText("Not a valid weather.dat file!\n");
+	else{
+		QTextStream stream(&inFile);
+		while(!stream.atEnd()){
+			QString line = stream.readLine();
+			if(line.endsWith("\\")){
+				do{
+					line = line.remove(QChar('\\'), Qt::CaseInsensitive) + " " + stream.readLine();
+				} while(line.endsWith("\\"));
+			}
+			lineList.append(line);
+			numLines++;
+		}
+		inFile.close();
+	}
+		if(endsWithSlash)
+		{
+			display->insertPlainText("You can't end weather.dat with a backslash!\n");
+		}
+		else{
+			int randNum = rand()%(numLines);
+			display->insertPlainText("Weather: " + lineList[randNum] + "\n");
+		}
 }
 
 void Advisor::reminderClicked()
 {
-	//QPushButton *clickedButton = qobject_cast<QPushButton *>(sender());
+	display->insertPlainText("Reminder");
 }
 
 void Advisor::quitClicked()
