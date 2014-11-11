@@ -1,6 +1,8 @@
 #include <QtWidgets>
 #include <QFile>
+#include <QDialog>
 #include "Advisor.h"
+#include <QCheckBox>
 
 bool isEndSlash(QString fileName)
 {
@@ -21,6 +23,7 @@ bool isEndSlash(QString fileName)
 Advisor::Advisor(QWidget *parent)
 	: QWidget(parent)
 {
+	showAgain = true;
 	//signalMapper = new QSignalMapper(this);
 	display = new QTextEdit();
 	display->setReadOnly(true);
@@ -122,10 +125,33 @@ void Advisor::weatherClicked()
 
 void Advisor::reminderClicked()
 {
-	display->insertPlainText("Reminder");
+	if(showAgain == true)
+	{
+		QCheckBox *checkbox = new QCheckBox("Don't show again", this);
+		QMessageBox msgBox;
+		msgBox.setText("Here is a reminder.");
+		msgBox.setCheckBox(checkbox);
+		msgBox.exec();
+	}
 }
 
 void Advisor::quitClicked()
+{
+	QMessageBox msgBox;
+	msgBox.setText("Are you sure you want to quit?");
+	msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Yes );
+	msgBox.setDefaultButton(QMessageBox::Cancel);
+	int ret = msgBox.exec();
+	switch (ret) {
+		case QMessageBox::Yes:
+			Advisor::quitProgram();
+		break;
+		default:
+			break;
+	}
+}
+
+void Advisor::quitProgram()
 {
 	this->close();
 }

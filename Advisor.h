@@ -18,12 +18,14 @@ class Advisor:public QWidget
 		void weatherClicked();
 		void reminderClicked();
 		void quitClicked();
+		void quitProgram();
 		
 	private:
 		QPushButton *createButton(const QString &text, const char *member);
 		void abortOperatiion();
 		QTextEdit *display;
 		QSignalMapper *signalMapper;
+		bool showAgain;
 };
 
 #endif
