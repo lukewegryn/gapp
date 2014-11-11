@@ -4,22 +4,65 @@
 #include "Advisor.h"
 #include <QCheckBox>
 
-bool isEndSlash(QString fileName)
+bool Advisor::isEndSlash(QString fileName)
 {
 	QFile inFile(fileName);
-	inFile.open(QIODevice::ReadOnly | QIODevice::Text);
-	QTextStream stream(&inFile);
-	QString fileString = stream.readAll();
-	if(fileString.endsWith("\\"))
-	{
-		inFile.close();
+	if(!inFile.open(QIODevice::ReadOnly | QIODevice::Text)){
+		display->insertPlainText("Not a valid file!");
 		return true;
 	}
-	else{
-		inFile.close();
-		return false;
+	else
+	{
+		QTextStream stream(&inFile);
+		QString fileString = stream.readAll();
+		if(fileString.endsWith("\\"))
+		{
+			inFile.close();
+			return true;
+		}
+		else{
+			inFile.close();
+			return false;
+		}
 	}
 }
+
+QString Advisor::getText(QString fileName)
+{
+	bool endsWithSlash = isEndSlash(fileName);
+	QStringList lineList;
+	QFile inFile(fileName);
+	int numLines = 0;
+	if(!inFile.open(QIODevice::ReadOnly | QIODevice::Text))
+		display->insertPlainText("Not a valid file!\n");
+	else{
+		QTextStream stream(&inFile);
+		while(!stream.atEnd()){
+			QString line = stream.readLine();
+			if(line.endsWith("\\")){
+				do{
+					line = line.remove(QChar('\\'), Qt::CaseInsensitive) + " " + stream.readLine();
+				} while(line.endsWith("\\"));
+			}
+			lineList.append(line);
+			numLines++;
+		}
+		inFile.close();
+	}
+		if(endsWithSlash)
+		{
+			display->insertPlainText("You can't end a file with a backslash!\n");
+			return NULL;
+		}
+		else{
+			int randNum = rand()%(numLines);
+			if(numLines > 0)
+				return lineList[randNum];
+			else
+				return NULL;
+		}
+}
+
 Advisor::Advisor(QWidget *parent)
 	: QWidget(parent)
 {
@@ -61,78 +104,57 @@ QPushButton *Advisor::createButton(const QString &text, const char *member)
 
 void Advisor::adviceClicked()
 {
-	bool endsWithSlash = isEndSlash("advice.dat");
-	QStringList lineList;
-	QFile inFile("advice.dat");
-	int numLines = 0;
-	if(!inFile.open(QIODevice::ReadOnly | QIODevice::Text))
-		display->insertPlainText("Not a valid advice.dat file!\n");
-	else{
-		QTextStream stream(&inFile);
-		while(!stream.atEnd()){
-			QString line = stream.readLine();
-			if(line.endsWith("\\")){
-				do{
-					line = line.remove(QChar('\\'), Qt::CaseInsensitive) + " " + stream.readLine();
-				} while(line.endsWith("\\"));
-			}
-			lineList.append(line);
-			numLines++;
-		}
-		inFile.close();
+	QString advice;
+	if((advice = getText("advice.dat")) != NULL)
+	{
+		display->insertPlainText("Advice: " + advice + "\n");
 	}
-		if(endsWithSlash)
-		{
-			display->insertPlainText("You can't end advice.dat with a backslash!\n");
-		}
-		else{
-			int randNum = rand()%(numLines);
-			display->insertPlainText("Advice: " + lineList[randNum] + "\n");
-		}
 }
 
 void Advisor::weatherClicked()
 {
-	bool endsWithSlash = isEndSlash("weather.dat");
-	QStringList lineList;
-	QFile inFile("weather.dat");
-	int numLines = 0;
-	if(!inFile.open(QIODevice::ReadOnly | QIODevice::Text))
-		display->insertPlainText("Not a valid weather.dat file!\n");
-	else{
-		QTextStream stream(&inFile);
-		while(!stream.atEnd()){
-			QString line = stream.readLine();
-			if(line.endsWith("\\")){
-				do{
-					line = line.remove(QChar('\\'), Qt::CaseInsensitive) + " " + stream.readLine();
-				} while(line.endsWith("\\"));
-			}
-			lineList.append(line);
-			numLines++;
-		}
-		inFile.close();
+	QString weather;
+	if((weather = getText("weather.dat")) != NULL)
+	{
+		display->insertPlainText("Weather: " + weather + "\n");
 	}
-		if(endsWithSlash)
-		{
-			display->insertPlainText("You can't end weather.dat with a backslash!\n");
-		}
-		else{
-			int randNum = rand()%(numLines);
-			display->insertPlainText("Weather: " + lineList[randNum] + "\n");
-		}
 }
 
 void Advisor::reminderClicked()
 {
 	if(showAgain == true)
 	{
-		QCheckBox *checkbox = new QCheckBox("Don't show again", this);
+		QCheckBox *checkbox = new QCheckBox("Show this message again.", this);
+		checkbox->setCheckState(Qt::Checked);
 		QMessageBox msgBox;
-		msgBox.setText("Here is a reminder.");
-		msgBox.setCheckBox(checkbox);
-		msgBox.exec();
+		QString reminder;
+		if((reminder = getText("reminder.dat")) != NULL)
+		{
+			QString day = QString::number(rand()%(30-1)+1);
+			QString month = QString::number(rand()%(12-1)+1);
+			QString year = QString::number(rand()%(2017-2014)+2014);
+			int hour = rand()%(24-1)+1;
+			int minute = rand()%(60-1)+1;
+			QTime theTime(hour, minute);
+			msgBox.setText(reminder + "at " + theTime.toString("h:mm ap") + " on " + month + "/" + day + "/" + year + ".");
+			msgBox.setCheckBox(checkbox);
+			connect(checkbox, SIGNAL(stateChanged(int)), this, SLOT(reminderCheck()));
+			msgBox.exec();
+		}
+		else
+		{
+			display->insertPlainText("You don't seem to have any reminders.\n");
+		}
 	}
+	else
+	{
+		display->insertPlainText("You disabled reminders!\n");
+	}
+}
+
+void Advisor::reminderCheck()
+{
+	showAgain = !showAgain;
 }
 
 void Advisor::quitClicked()

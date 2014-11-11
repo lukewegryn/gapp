@@ -17,6 +17,7 @@ class Advisor:public QWidget
 		void adviceClicked();
 		void weatherClicked();
 		void reminderClicked();
+		void reminderCheck();
 		void quitClicked();
 		void quitProgram();
 		
@@ -26,6 +27,8 @@ class Advisor:public QWidget
 		QTextEdit *display;
 		QSignalMapper *signalMapper;
 		bool showAgain;
+		QString getText(QString fileName);
+		bool isEndSlash(QString fileName);
 };
 
 #endif
